@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.zytosoft</groupId>
+    <artifactId>apple-macos-battery-manager</artifactId>
+    <version>0.1</version>
+
+    <name>App for leaning numbers</name>
+    <description>
+        App for leaning numbers
+    </description>
+
+    <url>www.zytosoft.com</url>
+    <licenses>
+        <license>
+            <name>GNU General Public License</name>
+            <url>http://www.gnu.org/licenses/gpl.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>ZytoSoft AG</name>
+        <url>www.zytosoft.com</url>
+    </organization>
+
+    <developers>
+        <developer>
+            <organization>ZytoSoft AG</organization>
+            <email>t.zytowski@zytosoft.com</email>
+            <name>Dr. Torsten Zytowski</name>
+            <roles>
+                <role>Architect</role>
+                <role>Developer</role>
+                <role>Test</role>
+                <role>Documentor</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <contributors>
+        <contributor>
+            <organization>Zytosoft AG</organization>
+            <name>Roswitha Zytowski</name>
+            <email>r.zytowski@zytosoft.com</email>
+            <roles>
+                <role>Tester</role>
+            </roles>
+        </contributor>
+    </contributors>
+
+    <properties>
+        <!-- Only Spring Boot Application -->
+        <java.version>1.11</java.version>
+
+        <maven.compiler.target>1.11</maven.compiler.target>
+        <maven.compiler.source>1.11</maven.compiler.source>
+
+        <maven.compiler.bootclasspath>1.11</maven.compiler.bootclasspath>
+
+        <!-- For real cross-compilation -->
+        <maven.compiler.release>11</maven.compiler.release>
+
+        <!-- Without tis property the maven-systems is complaining -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!-- INTERNAL -->
+        <!-- EXTERNAL -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.12</version>
+        </dependency>
+        <!-- TEST TEST TEST -->
+        <!-- INTERNAL -->
+        <!-- EXTERNAL -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.7.0-M1</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <!-- 1 -->
+                <!-- Lifecycle CLEAN -->
+                <!-- Phase clean -->
+                <!-- Used default plugin:goal => clean:clean -->
+                <!-- General see: https://maven.apache.org/plugins/maven-clean-plugin/ -->
+                <!-- For usage see:  https://maven.apache.org/plugins/maven-clean-plugin/usage.html -->
+                <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-clean-plugin -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.1.0</version>
+            </plugin>
+            <!-- 2  - Seems to be in Lifecycle validate
+             Phase, plugins and its goals are UNKNOWN.
+              -->
+            <plugin>
+                <!-- 3 -->
+                <!-- 1. Lifecycle COMPILE -->
+                <!-- 1. Phase resource -->
+                <!-- Used default plugin:goal => resource:resource -->
+                <!-- 2. Lifecycle TEST -->
+                <!-- 1. Phase test -->
+                <!-- Used default plugin:goal => resource:testResources -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.1.0</version>
+            </plugin>
+            <plugin>
+                <!-- 4 -->
+                <!-- Lifecycle COMPILE -->
+                <!-- Phase compile -->
+                <!-- Used default plugin:goal => compile:compile -->
+                <!-- 2. Lifecycle TEST -->
+                <!-- 1. Phase test-compile -->
+                <!-- Used default plugin:goal => compile:testCompile -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>1.11</source>
+                    <target>1.11</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <!-- 5 -->
+                <!-- 1. Lifecycle TEST -->
+                <!-- 1. Phase test -->
+                <!-- Used default plugin:goal => surefire:test -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M4</version>
+            </plugin>
+            <plugin>
+                <!-- 6 -->
+                <!-- 1. Lifecycle PACKAGE -->
+                <!-- 1. Phase package -->
+                <!-- Used default plugin:goal => jar:jar -->
+                <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-jar-plugin -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+            </plugin>
+            <plugin>
+                <!-- 7 -->
+                <!-- 1. Lifecycle PACKAGE -->
+                <!-- 1. Phase package -->
+                <!-- Used default plugin:goal => javadocs:javadocs -->
+                <!-- For JAVA_HOME issues see:
+                https://mkyong.com/java/maven-java_home-is-not-defined-correctly-on-mac-osx/?utm_source=self&utm_medium=referral&utm_campaign=afterpost-related&utm_content=link0
+                Or in very detail:
+                https://maven.apache.org/plugins/maven-javadoc-plugin/javadoc-mojo.html
+                -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <!--<doclint>none</doclint>-->
+                    <!--<doclint>all,-missing</doclint>-->
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>2.0.0</version>
+                <executions>
+                    <execution>
+                        <id>download-licenses</id>
+                        <goals>
+                            <goal>download-licenses</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            -->
+
+            <plugin>
+                <!-- 8 -->
+                <!-- 1. Lifecycle VERIFY -->
+                <!-- 1. Phase attach-sources (???) -->
+                <!-- Used default plugin:goal => source:jar-no-fork -->
+                <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-source-plugin -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- 9 -->
+                <!-- 1. Lifecycle INSTALL -->
+                <!-- 1. Phase install -->
+                <!-- Used default plugin:goal => install:install -->
+                <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-install-plugin -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>3.0.0-M1</version>
+                <configuration>
+                </configuration>
+            </plugin>
+            <plugin>
+                <!-- 10 -->
+                <!-- 1. Lifecycle SITE -->
+                <!-- 1. Phase site -->
+                <!-- Used default plugin:goal => site:site -->
+                <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-site-plugin -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.9.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.0.0-M1</version>
+            </plugin>
+        </plugins>
+    </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <!-- 11 -->
+                <!-- In connection with plugin SITE necessary.
+                Else it will complain too new compilation versions -->
+                <!-- 1. Lifecycle SITE -->
+                <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-project-info-reports-plugin -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>3.1.0</version>
+            </plugin>
+        </plugins>
+    </reporting>
+
+</project>

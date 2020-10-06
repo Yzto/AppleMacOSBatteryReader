@@ -18,7 +18,7 @@ public class BatteryManager
 {
     private static final float SECONDS_PER_HOUR = 3600F;
     private static final int WAIT_TIME_IN_SECONDS = 60;
-    int repeationCounter = 0;
+    int repetitionCounter = 0;
 
     public static void main(String[] args)
     {
@@ -45,12 +45,61 @@ public class BatteryManager
         }
     }
 
+    private static String getFirstLine(String fullAnswer, String startsWithToken)
+    {
+        final StringReader stringReader = new StringReader(fullAnswer);
+
+        final BufferedReader bufferedReader = new BufferedReader(stringReader);
+
+        //int lineCounter = 0;
+
+        try
+        {
+            String line;
+
+            // Initialize
+            line = bufferedReader.readLine();
+
+            while (line != null)
+            {
+                //lineCounter++;
+
+                if (line.contains("|"))
+                {
+                    // Pipe must be escaped!
+                    line = line.replaceAll("\\|", " ").trim();
+                }
+
+                if (line.contains("+-o"))
+                {
+                    // Pipe must be escaped!
+                    line = line.replaceAll("\\+-o", " ").trim();
+                }
+
+                if (line.startsWith(startsWithToken))
+                {
+                    return line;
+                }
+
+                line = bufferedReader.readLine();
+            }
+
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        return "";
+
+    }
+
     private void doIt()
     {
         // Precondition
-        repeationCounter++;
+        repetitionCounter++;
 
-        if (repeationCounter > 60)
+        if (repetitionCounter > 60)
         {
             System.exit(0);
         }
@@ -90,8 +139,9 @@ public class BatteryManager
         }
     }
 
-    private final String getStatusInformationBlock(final Runtime runtime)
+    private String getStatusInformationBlock(final Runtime runtime)
     {
+        String result;
         try
         {
             final Process process = runtime.exec("ioreg -l");
@@ -102,21 +152,21 @@ public class BatteryManager
 
             final byte[] allBytes = bufferedInputStream.readAllBytes();
 
-            final String fullAnswer = new String(allBytes);
-
-            return fullAnswer;
+            result = new String(allBytes);
         }
         catch (IOException e)
         {
             e.printStackTrace();
 
-            return "ERROR";
+            result = "ERROR";
         }
+
+        return result;
     }
 
     private void setNextOutputHeader()
     {
-        currentInstant = new Date().toInstant();
+        Instant currentInstant = new Date().toInstant();
 
         final long milliseconds;
 
@@ -129,27 +179,13 @@ public class BatteryManager
             milliseconds = 0;
         }
 
-        waitingDelay = (int) (milliseconds / 1000L);
+        int waitingDelay = (int) (milliseconds / 1000L);
 
         String number = numberFormatInt.format(waitingDelay);
 
         System.out.println("\n------- " + currentInstant + " - " + number + " seconds ----------\n");
 
         lastInstant = currentInstant;
-    }
-
-    private void initializeGenerals()
-    {
-        locale = new Locale("de", "GER");
-
-        numberFormatInt = NumberFormat.getInstance(locale);
-
-        numberFormatInt.setMaximumFractionDigits(0);
-
-        numberFormatFloat = NumberFormat.getInstance(locale);
-
-        numberFormatFloat.setMaximumFractionDigits(3);
-        numberFormatFloat.setMinimumFractionDigits(3);
     }
 
 
@@ -309,46 +345,19 @@ public class BatteryManager
         lastMilliMolOfElectrons = currentCurrentInMilliMolOfElectrons;
     }
 
-    private void setCurrentCurrentState()
+    private void initializeGenerals()
     {
-        System.out.println("\t 3.1. Current or Streams - Current State");
+        // General environment
+        Locale locale = new Locale("de", "GER");
 
-        // The duration between two measurements is 60 seconds (by default)
+        numberFormatInt = NumberFormat.getInstance(locale);
 
-        //
-        final float currentCurrentInAmpere_Or_CoulombPerSecond = currentChargeChangeInAmpereSeconds_or_Coulomb / ((float) WAIT_TIME_IN_SECONDS);
+        numberFormatInt.setMaximumFractionDigits(0);
 
-        currentCurrentInAmpere_Or_CoulombPerSecondMessureValue =
-                new MeasuredValue(currentCurrentInAmpere_Or_CoulombPerSecond,
-                        new MeasuredValueUnit[]{
-                                new MeasuredValueUnit("A", "Δ[I]")
-                                , new MeasuredValueUnit("C/s", "Δ[Q] / Δ[t]")});
+        numberFormatFloat = NumberFormat.getInstance(locale);
 
-        currentCurrentInAmpere_Or_CoulombPerSecondMessureValue.print();
-
-        //
-        final float currentCurrentInMilliAmpereHoursPerSecond = ((float) currentConsumedMilliAmpereHours) / ((float) WAIT_TIME_IN_SECONDS);
-
-        currentCurrentInMilliAmpereHoursPerSecondMessureValue =
-                new MeasuredValue(currentCurrentInMilliAmpereHoursPerSecond,
-                        new MeasuredValueUnit[]{
-                                new MeasuredValueUnit("mAh/s", "Δ[It] / Δ[t] ")
-                                });
-
-        currentCurrentInMilliAmpereHoursPerSecondMessureValue.print();
-
-        lastCurrentInMilliAmpereHours = currentCurrentInMilliAmpereHours;
-
-        //
-        final float consumedMilliMolOfElectronsPerSecond = 1000F * currentChargeChangeInMilliMolOfElectrons / ((float) WAIT_TIME_IN_SECONDS);
-
-        currentCurrentInMilliAmpereHoursPerSecondMessureValue =
-                new MeasuredValue(consumedMilliMolOfElectronsPerSecond,
-                        new MeasuredValueUnit[]{
-                                new MeasuredValueUnit("µmol/s (electrons)", "Δ[N(a)] / Δ[t] ")
-                        });
-
-        currentCurrentInMilliAmpereHoursPerSecondMessureValue.print();
+        numberFormatFloat.setMaximumFractionDigits(3);
+        numberFormatFloat.setMinimumFractionDigits(3);
     }
 
     private void setEnergyCurrentState()
@@ -431,6 +440,46 @@ public class BatteryManager
         System.out.println("\t\t <" + number + "> Wh");
     }
 
+    private void setCurrentCurrentState()
+    {
+        System.out.println("\t 3.1. Current or Streams - Current State");
+
+        // The duration between two measurements is 60 seconds (by default)
+
+        //
+        final float currentCurrentInAmpere_Or_CoulombPerSecond = currentChargeChangeInAmpereSeconds_or_Coulomb / ((float) WAIT_TIME_IN_SECONDS);
+
+        MeasuredValue currentCurrentInAmpere_Or_CoulombPerSecondMeasureValue = new MeasuredValue(currentCurrentInAmpere_Or_CoulombPerSecond,
+                new MeasuredValueUnit[]{
+                        new MeasuredValueUnit("A", "Δ[I]")
+                        , new MeasuredValueUnit("C/s", "Δ[Q] / Δ[t]")});
+
+        currentCurrentInAmpere_Or_CoulombPerSecondMeasureValue.print();
+
+        //
+        final float currentCurrentInMilliAmpereHoursPerSecond = ((float) currentConsumedMilliAmpereHours) / ((float) WAIT_TIME_IN_SECONDS);
+
+        MeasuredValue currentCurrentInMilliAmpereHoursPerSecondMeasureValue = new MeasuredValue(currentCurrentInMilliAmpereHoursPerSecond,
+                new MeasuredValueUnit[]{
+                        new MeasuredValueUnit("mAh/s", "Δ[It] / Δ[t] ")
+                });
+
+        currentCurrentInMilliAmpereHoursPerSecondMeasureValue.print();
+
+        lastCurrentInMilliAmpereHours = currentCurrentInMilliAmpereHours;
+
+        //
+        final float consumedMilliMolOfElectronsPerSecond = 1000F * currentChargeChangeInMilliMolOfElectrons / ((float) WAIT_TIME_IN_SECONDS);
+
+        currentCurrentInMilliAmpereHoursPerSecondMeasureValue =
+                new MeasuredValue(consumedMilliMolOfElectronsPerSecond,
+                        new MeasuredValueUnit[]{
+                                new MeasuredValueUnit("µmol/s (electrons)", "Δ[N(a)] / Δ[t] ")
+                        });
+
+        currentCurrentInMilliAmpereHoursPerSecondMeasureValue.print();
+    }
+
     private void setPowerCurrentState()
     {
         System.out.println("\t 5.1. Power - Current State");
@@ -470,98 +519,59 @@ public class BatteryManager
         unit = "VC/s | J/s | W";
         explanation = "[U](V) * Δ[Q](C) / Δ[t](s) or [U](V) * Δ[It](As) / Δ[t](s)";
 
-        out = formatLine(2, number, unit, explanation);
+        out = formatLine(3, number, unit, explanation);
         System.out.println(out);
     }
 
     private String formatLine(int tabCount, String number, String unit, String explanation)
     {
         // ("\t\t <" + number + "> J/s <= Δ[E](J) / [T](s)");
-        String line = "";
+        final StringBuilder line = new StringBuilder();
 
         // 1. Left Tabs
-        for (int i = 0; i < tabCount; i++)
-        {
-            line += "\t";
-        }
+        line.append("\t".repeat(tabCount));
 
         // 2. Number
-        String numberPart = "<" + number + ">";
+        final StringBuilder numberPart = new StringBuilder("<" + number + ">");
 
         while (numberPart.length() < 12)
         {
-            numberPart += " ";
+            numberPart.append(" ");
         }
 
-        line += numberPart;
+        line.append(numberPart);
 
         // 3. Unit
-        String unitPart = unit;
+        final StringBuilder unitPart = new StringBuilder(unit);
 
         while (unitPart.length() < 12)
         {
-            unitPart += " ";
+            unitPart.append(" ");
         }
 
-        line += unitPart;
+        line.append(unitPart);
 
-        // 4. Expalanation
-        line += " <= ";
+        // 4. Explanation
+        line.append(" <= ");
 
-        line += explanation;
+        line.append(explanation);
 
-        return line;
+        return line.toString();
     }
 
-    private static String getFirstLine(String fullAnswer, String startsWithToken)
+    static class MeasuredValueUnit
     {
-        final StringReader stringReader = new StringReader(fullAnswer);
+        final String unit;
 
-        final BufferedReader bufferedReader = new BufferedReader(stringReader);
+        //-----properties-----properties-----properties-----properties-----properties
+        final String explanation;
 
-        int lineCounter = 0;
-
-        try
+        MeasuredValueUnit(final String unit, final String explanation)
         {
-            String line;
-
-            // Initilize
-            line = bufferedReader.readLine();
-
-            while (line != null)
-            {
-                lineCounter++;
-
-                if (line.contains("|"))
-                {
-                    // Pipe must be escaped!
-                    line = line.replaceAll("\\|", " ").trim();
-                }
-
-                if (line.contains("+-o"))
-                {
-                    // Pipe must be escaped!
-                    line = line.replaceAll("\\+-o", " ").trim();
-                }
-
-                if (line.startsWith(startsWithToken))
-                {
-                    return line;
-                }
-
-                line = bufferedReader.readLine();
-            }
-
+            this.unit = unit;
+            this.explanation = explanation;
         }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        return "";
-
     }
-
 
     class MeasuredValue
     {
@@ -575,7 +585,7 @@ public class BatteryManager
         {
             final String number = numberFormatFloat.format(value);
 
-            String unit= "";;
+            StringBuilder unit = new StringBuilder();
 
             boolean firstHandled = false;
 
@@ -584,15 +594,15 @@ public class BatteryManager
                 if(!firstHandled)
                 {
                     firstHandled = true;
-                    unit = measuredValueUnit.unit;
+                    unit.append(measuredValueUnit.unit);
                 }
                 else
                 {
-                    unit += " | " + measuredValueUnit.unit;
+                    unit.append(" | ").append(measuredValueUnit.unit);
                 }
             }
 
-            String explanation = "<= ";
+            StringBuilder explanation = new StringBuilder("<= ");
 
             firstHandled = false;
 
@@ -601,15 +611,15 @@ public class BatteryManager
                 if(!firstHandled)
                 {
                     firstHandled = true;
-                    explanation = measuredValueUnit.explanation;
+                    explanation.append(measuredValueUnit.explanation);
                 }
                 else
                 {
-                    explanation += " | " + measuredValueUnit.explanation;
+                    explanation.append(" | ").append(measuredValueUnit.explanation);
                 }
             }
 
-            final String out = formatLine(2, number, unit, explanation);
+            final String out = formatLine(2, number, unit.toString(), explanation.toString());
 
             System.out.println(out);
         }
@@ -620,34 +630,16 @@ public class BatteryManager
         final MeasuredValueUnit[] measuredValueUnits;
     }
 
-    class MeasuredValueUnit
-    {
-        MeasuredValueUnit(final String unit, final String explanation)
-        {
-            this.unit = unit;
-            this.explanation = explanation;
-        }
-
-        //-----properties-----properties-----properties-----properties-----properties
-
-        final String unit;
-        final String explanation;
-    }
-
 
     //-----properties-----properties-----properties-----properties-----properties
 
 
     private Runtime currentRuntime;
 
-    // General environment
-    private Locale locale;
     private NumberFormat numberFormatInt;
     private NumberFormat numberFormatFloat;
 
-    private Instant currentInstant;
     private Instant lastInstant;
-    private int waitingDelay = 0;
 
     // Voltage
     private int currentVoltageInMilliVolt = 0;
@@ -662,9 +654,6 @@ public class BatteryManager
     private float currentCurrentInAmpereSeconds_or_Coulomb;
     private float currentCurrentInMilliMolOfElectrons;
     private float lastMilliMolOfElectrons;
-
-    private MeasuredValue currentCurrentInAmpere_Or_CoulombPerSecondMessureValue;
-    private MeasuredValue currentCurrentInMilliAmpereHoursPerSecondMessureValue;
 
     // Charge Change
     private int currentConsumedMilliAmpereHours;
